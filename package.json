@@ -1,0 +1,23 @@
+{
+  "name": "twelve-factor-express-service",
+  "version": "1.0.0",
+  "description": "Minimal Node.js Express microservice structured following Twelve-Factor App methodology",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "12-factor",
+    "twelve-factor-app",
+    "express",
+    "microservice",
+    "nodejs"
+  ],
+  "author": "Weslley Holanda",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
