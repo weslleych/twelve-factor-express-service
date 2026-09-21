@@ -19,9 +19,9 @@ Minimal Node.js Express microservice structured from the ground up adhering to t
 | **VI. Processes** | Execute the app as one or more stateless processes | Stateless HTTP request handling; shared state is never kept in-memory across requests. |
 | **VII. Port binding** | Export services via port binding | Self-contained HTTP service binding directly to `process.env.PORT || 3000`. |
 | **VIII. Concurrency** | Scale out via the process model | Individual Node.js process ready to be scaled horizontally across containers/processes. |
-| **IX. Disposability** | Maximize robustness with fast startup and graceful shutdown | Fast boot and signal interception (`SIGTERM`, `SIGINT`) to drain connections before process termination. |
+| **IX. Disposability** | Maximize robustness with fast startup and graceful shutdown | Intercepts `SIGTERM` and `SIGINT`, rejects new requests (503), stops HTTP listener, drains active sockets, closes idle keep-alive connections, and enforces a failsafe timeout. |
 | **X. Dev/prod parity** | Keep development, staging, and production as similar as possible | Consistent execution environment and configuration model across all stages. |
-| **XI. Logs** | Treat logs as event streams | Logs are written directly as unbuffered event streams to `stdout` / `stderr`. |
+| **XI. Logs** | Treat logs as event streams | Middleware streams structured JSON lines (`method`, `route`, `status`, `duration`) directly to `stdout`. Zero log files written to local disk. |
 | **XII. Admin processes** | Run admin/management tasks as one-off processes | Admin scripts/migrations can run as one-off tasks in the same environment. |
 
 ---
