@@ -46,21 +46,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Factor VII: Port binding - export services via port binding
-const server = app.listen(config.port, () => {
-  console.log(
-    `[${new Date().toISOString()}] [${config.appName}] Server running in ${config.nodeEnv} mode on port ${config.port}`
-  );
-});
-
 // Track open sockets/connections to safely close and release them during shutdown
 const activeConnections = new Set();
-server.on('connection', (connection) => {
-  activeConnections.add(connection);
-  connection.on('close', () => {
-    activeConnections.delete(connection);
-  });
-});
+let server = null;
 
 // Factor IX: Disposability - Fast startup and graceful shutdown
 const gracefulShutdown = (signal) => {
@@ -70,6 +58,10 @@ const gracefulShutdown = (signal) => {
   isShuttingDown = true;
 
   console.log(`[${new Date().toISOString()}] Received ${signal}. Initiating graceful shutdown...`);
+
+  if (!server) {
+    process.exit(0);
+  }
 
   // Stop accepting new connections
   server.close((err) => {
@@ -101,7 +93,33 @@ const gracefulShutdown = (signal) => {
   forceExitTimer.unref();
 };
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+const startServer = (port = config.port) => {
+  // Factor VII: Port binding - export services via port binding
+  server = app.listen(port, () => {
+    console.log(
+      `[${new Date().toISOString()}] [${config.appName}] Server running in ${config.nodeEnv} mode on port ${port}`
+    );
+  });
 
-module.exports = { app, server };
+  server.on('connection', (connection) => {
+    activeConnections.add(connection);
+    connection.on('close', () => {
+      activeConnections.delete(connection);
+    });
+  });
+
+  return server;
+};
+
+// When executed directly (e.g. node src/server.js or npm start), start the listener and bind OS signals
+if (require.main === module) {
+  startServer();
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+}
+
+module.exports = app;
+module.exports.app = app;
+module.exports.startServer = startServer;
+module.exports.gracefulShutdown = gracefulShutdown;
+module.exports.getServer = () => server;
