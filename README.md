@@ -13,7 +13,7 @@ Minimal Node.js Express microservice structured from the ground up adhering to t
 | :--- | :--- | :--- |
 | **I. Codebase** | One codebase tracked in revision control, many deploys | Single Git repository on GitHub (`weslleych/twelve-factor-express-service`). |
 | **II. Dependencies** | Explicitly declare and isolate dependencies | Declared explicitly in `package.json` and pinned via `package-lock.json`. No reliance on implicit system-wide packages. |
-| **III. Config** | Store config in the environment | Port and runtime configurations are injected via environment variables (`PORT`, `NODE_ENV`) loaded via `dotenv`. Secrets and environment configurations are excluded via `.gitignore`. |
+| **III. Config** | Store config in the environment | Centralized validation module (`src/config.js`) parses, validates, and freezes runtime configuration (`PORT`, `NODE_ENV`, `APP_NAME`) from environment variables. Secrets and local configs are excluded via `.gitignore`. |
 | **IV. Backing services** | Treat backing services as attached resources | Future databases, message brokers, and caches will be connected via environment URL/connection strings. |
 | **V. Build, release, run** | Strictly separate build and run stages | Clear operational scripts (`npm start` for production run, CI/CD pipeline compatibility). |
 | **VI. Processes** | Execute the app as one or more stateless processes | Stateless HTTP request handling; shared state is never kept in-memory across requests. |
@@ -52,8 +52,9 @@ cp .env.example .env
 ```
 
 Available environment variables:
-- `PORT`: Port on which the HTTP server will listen (defaults to `3000`).
-- `NODE_ENV`: Application environment (`development`, `production`, `test`).
+- `APP_NAME`: Name identifier for the microservice (defaults to `twelve-factor-express-service`).
+- `PORT`: TCP port on which the HTTP server will listen (defaults to `3000`).
+- `NODE_ENV`: Application runtime environment (`development`, `production`, `test`). Defaults to `development`.
 
 ### Running the Application
 

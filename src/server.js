@@ -1,8 +1,7 @@
-require('dotenv').config();
 const express = require('express');
+const config = require('./config');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Factor VI: Stateless processes - middleware for JSON payloads
 app.use(express.json());
@@ -10,7 +9,8 @@ app.use(express.json());
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    service: 'twelve-factor-express-service',
+    service: config.appName,
+    environment: config.nodeEnv,
     status: 'operational',
     timestamp: new Date().toISOString()
   });
@@ -20,14 +20,18 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
+    service: config.appName,
+    environment: config.nodeEnv,
     uptime: process.uptime(),
     timestamp: new Date().toISOString()
   });
 });
 
 // Factor VII: Port binding - export services via port binding
-const server = app.listen(PORT, () => {
-  console.log(`[${new Date().toISOString()}] Server running on port ${PORT}`);
+const server = app.listen(config.port, () => {
+  console.log(
+    `[${new Date().toISOString()}] [${config.appName}] Server running in ${config.nodeEnv} mode on port ${config.port}`
+  );
 });
 
 // Factor IX: Disposability - maximize robustness with fast startup and graceful shutdown
@@ -51,3 +55,5 @@ const handleShutdown = (signal) => {
 
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 process.on('SIGINT', () => handleShutdown('SIGINT'));
+
+module.exports = { app, server };
